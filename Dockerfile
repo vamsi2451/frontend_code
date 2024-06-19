@@ -1,4 +1,3 @@
-
 FROM node:18-alpine
 
 WORKDIR /app
@@ -10,11 +9,9 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
-
+# RUN npm run builds
 RUN npm install -g serve
 
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["sh", "-c", "npm run build && serve -s build -l 3000"]
 
 EXPOSE 3000
-# Expose port 3000 to the outside world

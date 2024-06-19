@@ -37,17 +37,20 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
     setError(null);
 
     try {
+      console.log('Fetching suggestions for:', query);
+
       const response = await fetch(`${process.env.REACT_APP_MAPTILER_AUTOCOMPLETE_API}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'api-key':`${process.env.REACT_APP_MAPTILER_AUTOCOMPLETE_API_KEY}` ,
         },
         body: JSON.stringify({
           refNum: "Test",
           location: query,
-          source: "test",
+          source: `${process.env.REACT_APP_MAPTILER_AUTOCOMPLETE_API_SOURCE}`,
           boundaryCountry: [],
-          size: 10,
+          size: 10
         }),
       });
 
@@ -56,6 +59,8 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
       }
 
       const data = await response.json();
+      console.log('Suggestions data:', data);
+
       // Transform the API response to match the LocationData structure
       const transformedData = data.locations.map((item: any, index: number) => ({
         place_id: `location_${index}`,  // generate a unique place_id for each location
@@ -63,6 +68,8 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
         lat: item.latitude,             // latitude as a number
         lon: item.longitude,            // longitude as a number
       }));
+      console.log('Transformed suggestions:', transformedData);
+
       setSuggestions(transformedData);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
@@ -74,11 +81,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
+    console.log('Query changed:', newQuery);
     setQuery(newQuery);
     fetchSuggestions(newQuery);
   };
 
   const handleLocationSelect = (suggestion: LocationData) => {
+    console.log('Location selected:', suggestion);
+
     onLocationSelected(suggestion.lat, suggestion.lon);
     setQuery(suggestion.display_name);
     setSuggestions([]);
@@ -91,12 +101,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
 
       if (markerRef.current.length > 0) {
         markerRef.current[0].setLngLat([suggestion.lon, suggestion.lat]);
+        console.log('Marker updated:', markerRef.current[0]);
       } else {
         markerRef.current = [
           new maplibregl.Marker()
             .setLngLat([suggestion.lon, suggestion.lat])
             .addTo(mapRef),
         ];
+        console.log('New marker added:', markerRef.current[0]);
       }
     }
   };

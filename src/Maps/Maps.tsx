@@ -8,8 +8,8 @@ import SearchComponent from "../Search/Search";
 const MapComponent: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const markerRef: React.MutableRefObject<maplibregl.Marker[]> = useRef([]);
-  const [currentStyle, setCurrentStyle] = useState(
+  const markerRef = useRef<maplibregl.Marker[]>([]);
+  const [currentStyle, setCurrentStyle] = useState<string>(
     `${process.env.REACT_APP_MAPTILER_API_KEY}`
   );
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -32,12 +32,16 @@ const MapComponent: React.FC = () => {
 
   useEffect(() => {
     if (mapContainerRef.current) {
+      console.log('Initializing map');
+
       mapRef.current = new maplibregl.Map({
         container: mapContainerRef.current,
         style: currentStyle,
         center: [selectedLocation.lon, selectedLocation.lat],
         zoom: 12,
       });
+
+      console.log('Map instance created:', mapRef.current);
 
       mapRef.current.addControl(
         new maplibregl.NavigationControl(),
@@ -54,19 +58,25 @@ const MapComponent: React.FC = () => {
           .addTo(mapRef.current!),
       ];
 
+      console.log('Initial marker added:', markerRef.current);
+
       // Add additional markers for other locations
       locations.forEach(({ name, lat, lon }) => {
         const marker = new maplibregl.Marker({ color: "red" })
           .setLngLat([lon, lat])
           .setPopup(new maplibregl.Popup().setHTML(`<h3>${name}</h3>`))
           .addTo(mapRef.current!);
-        markerRef.current = [...markerRef.current, marker];
+        markerRef.current.push(marker);
+
+        console.log(`Marker for ${name} added:`, marker);
+
         marker.getElement().addEventListener('click', () => handleMarkerClick(lat, lon));
       });
 
       return () => {
         if (mapRef.current) {
           mapRef.current.remove();
+          console.log('Map instance removed');
         }
       };
     }
@@ -74,16 +84,19 @@ const MapComponent: React.FC = () => {
 
   const handleStyleChange = (newStyle: string) => {
     if (mapRef.current) {
+      console.log('Changing style to:', newStyle);
       setCurrentStyle(newStyle);
       mapRef.current.setStyle(newStyle);
 
       markerRef.current.forEach((marker) =>
         marker.setLngLat([selectedLocation.lon, selectedLocation.lat])
       );
+      console.log('Markers updated to new style:', markerRef.current);
     }
   };
 
   const handleMarkerClick = (lat: number, lon: number) => {
+    console.log('Marker clicked:', lat, lon);
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: [lon, lat],
@@ -101,6 +114,7 @@ const MapComponent: React.FC = () => {
         }
       });
 
+      console.log('Map flew to:', { lat, lon });
       setSelectedLocation({ lat, lon });
     }
   };

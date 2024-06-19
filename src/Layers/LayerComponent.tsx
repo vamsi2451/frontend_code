@@ -9,12 +9,15 @@ interface LayerComponentProps {
   currentStyle: string;
 }
 
-
 const LayerComponent: React.FC<LayerComponentProps> = ({
-  
   onChange,
   currentStyle,
 }) => {
+  const handleStyleChange = (newStyle: string, viewName: string) => {
+    console.log(`Changing style to ${viewName}:`, newStyle);
+    onChange(newStyle);
+  };
+
   return (
     <div>
       <img
@@ -27,23 +30,25 @@ const LayerComponent: React.FC<LayerComponentProps> = ({
         src={map}
         alt="Basic View"
         onClick={() =>
-          onChange(
-            `${process.env.REACT_APP_MAPTILER_API_KEY}`
-            )
+          handleStyleChange(
+            `${process.env.REACT_APP_MAPTILER_API_KEY}`,
+            "Basic View"
+          )
         }
       />
       <img
         className={`image ${
-          currentStyle ===`${process.env.REACT_APP_MAPTILER_LAYER_STREETS}`
+          currentStyle === `${process.env.REACT_APP_MAPTILER_LAYER_STREETS}`
             ? "active"
             : ""
         }`}
         src={street}
         alt="Streets View"
         onClick={() =>
-          onChange(
-            `${process.env.REACT_APP_MAPTILER_LAYER_STREETS}`
-            )
+          handleStyleChange(
+            `${process.env.REACT_APP_MAPTILER_LAYER_STREETS}`,
+            "Streets View"
+          )
         }
       />
       <img
@@ -56,13 +61,13 @@ const LayerComponent: React.FC<LayerComponentProps> = ({
         src={satellite}
         alt="Satellite View"
         onClick={() =>
-          onChange(
-            `${process.env.REACT_APP_MAPTILER_LAYER_SATELLITE}`
-            )
+          handleStyleChange(
+            `${process.env.REACT_APP_MAPTILER_LAYER_SATELLITE}`,
+            "Satellite View"
+          )
         }
       />
     </div>
-    
   );
 };
 
